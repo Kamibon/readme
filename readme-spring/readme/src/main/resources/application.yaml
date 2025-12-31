@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: readme
+  datasource:
+    url: jdbc:postgresql://localhost:5432/readme
+    username: postgres  
+    password: toor
+    driver-class-name: org.postgresql.Driver  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/readme
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+server:
+      port: 8081
+jwt:
+  auth:
+    converter:
+      resource-id: readme

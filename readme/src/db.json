@@ -1,0 +1,115 @@
+{
+  "books": [
+    {
+      "id": "1",
+      "title": "Il nome della rosa",
+      "author": "Umberto Eco",
+      "year": 1980,
+      "genre": "Storico",
+      "available": true,
+      "isbn": "8845207056",
+      "description": "Un romanzo storico ambientato in un monastero medievale, dove un frate indaga su una serie di misteriosi omicidi.",
+      "read": [
+        "2"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "1984",
+      "author": "George Orwell",
+      "year": 1949,
+      "genre": "Distopico",
+      "available": false,
+      "isbn": "9780451524935",
+      "description": "Un classico della letteratura distopica che esplora i temi del totalitarismo, del controllo e della libertà individuale.",
+      "read": [
+        "1"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Il Signore degli Anelli",
+      "author": "J.R.R. Tolkien",
+      "year": 1954,
+      "genre": "Fantasy",
+      "available": true,
+      "isbn": "9780261103252",
+      "description": "L'epico romanzo fantasy che segue la Compagnia dell'Anello nella missione di distruggere l'Unico Anello e sconfiggere Sauron, il Signore Oscuro di Mordor.",
+      "read": []
+    },
+    {
+      "id": "4",
+      "title": "Cent'anni di solitudine",
+      "author": "Gabriel García Márquez",
+      "year": 1967,
+      "genre": "Realismo magico",
+      "available": true,
+      "isbn": "8804404078",
+      "description": "La saga della famiglia Buendía nella città immaginaria di Macondo, un capolavoro del realismo magico.",
+      "read": [
+        "3",
+        "1"
+      ]
+    },
+    {
+      "id": "5",
+      "title": "La coscienza di Zeno",
+      "author": "Italo Svevo",
+      "year": 1923,
+      "genre": "Romanzo psicologico",
+      "available": false,
+      "isbn": "9788807900065",
+      "description": "Il racconto introspettivo di Zeno Cosini, un uomo alle prese con le proprie nevrosi e contraddizioni.",
+      "read": [
+        "2",
+        "1"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "mariorossi",
+      "password": "user1",
+      "favorites": [
+        "1",
+        "3"
+      ],
+      "followed": [
+        "2",
+        "3"
+      ],
+      "follows": [
+        "2"
+      ]
+    },
+    {
+      "id": "2",
+      "username": "annabianchi",
+      "password": "user2",
+      "favorites": [
+        "2",
+        "4",
+        "5"
+      ],
+      "followed": [
+        "3"
+      ],
+      "follows": [
+        "1"
+      ]
+    },
+    {
+      "id": "3",
+      "username": "lucaverdi",
+      "password": "user3",
+      "favorites": [],
+      "followed": [
+        "1"
+      ],
+      "follows": [
+        "2"
+      ]
+    }
+  ]
+}

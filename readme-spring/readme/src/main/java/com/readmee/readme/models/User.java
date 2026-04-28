@@ -11,6 +11,8 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -39,15 +41,5 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "book_id") 
     )
     private Set<Book> favorites = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_following", 
-        joinColumns = @JoinColumn(name = "user_id"),  
-        inverseJoinColumns = @JoinColumn(name = "following_id") 
-    )
-    private Set<User> follows = new HashSet<>();
-
-    @ManyToMany(mappedBy = "follows")
-    private Set<User> followed = new HashSet<>();
 }
+

@@ -7,9 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.readmee.readme.models.Book;
+import com.readmee.readme.models.Follow;
 import com.readmee.readme.models.User;
 import com.readmee.readme.repositories.BookRepository;
+import com.readmee.readme.repositories.FollowRepository;
 import com.readmee.readme.repositories.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -19,6 +23,9 @@ public class UserService {
 
   @Autowired
   private BookRepository bookRepository;
+
+  @Autowired
+  private FollowRepository followRepository;
 
   public User createUser(User user) {
     User request = User.builder().username(user.getUsername()).email(user.getEmail()).build();
@@ -46,22 +53,36 @@ public class UserService {
   }
 
   public void addFavorite(Integer userId, Integer bookId) {
-      
-        User user = repository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Book book = bookRepository.findById(bookId)
-            .orElseThrow(() -> new RuntimeException("Book not found"));
+    User user = repository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getFavorites().contains(book)) {
-          
-            user.getFavorites().remove(book);
-        } else {
-          
-            user.getFavorites().add(book);
-        }
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(() -> new RuntimeException("Book not found"));
 
-        repository.save(user);
+    if (user.getFavorites().contains(book)) {
+
+      user.getFavorites().remove(book);
+    } else {
+
+      user.getFavorites().add(book);
     }
 
+    repository.save(user);
+  }
+
+  @Transactional
+  public void followUser(Integer followerId, Integer followedId) {
+    if (followerId.equals(followedId)) {
+        throw new RuntimeException("An user cannot follow themselves");
+    }
+
+    Optional<Follow> existingFollow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId);
+    if (existingFollow.isPresent()) {
+        followRepository.delete(existingFollow.get());
+    }
+
+    Follow follow = new Follow(followerId, followedId);
+    followRepository.save(follow);
+  }
 }

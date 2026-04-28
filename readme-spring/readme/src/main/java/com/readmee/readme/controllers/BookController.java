@@ -1,13 +1,14 @@
 package com.readmee.readme.controllers;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,13 +17,10 @@ import com.readmee.readme.services.BookService;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 @PreAuthorize("hasAnyAuthority('admin', 'user')")
-@RequestMapping("/books")
+@RequestMapping("/api/books")
 public class BookController {
     
     @Autowired
@@ -36,7 +34,7 @@ public class BookController {
 
     @GetMapping("/{id}")
     @RolesAllowed("user")
-    public Optional<Book> getBookById(@PathVariable Integer id) {
+    public Book getBookById(@PathVariable Integer id) {
         return service.getBookById(id);
     }
 

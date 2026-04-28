@@ -36,8 +36,6 @@ public class UserInitializer {
                         .username(username)
                         .email(email)
                         .favorites(new HashSet<>())
-                        .follows(new HashSet<>())
-                        .followed(new HashSet<>())
                         .build();
                 return userRepository.save(user);
             });

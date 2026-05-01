@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-js'
 import { ref } from 'vue'
 
-const keycloak = ref<Keycloak|null>(null)
+const keycloak = ref<Keycloak | null>(null)
 
 keycloak.value = new Keycloak({
   url: 'http://localhost:9090',
@@ -19,9 +19,11 @@ keycloak.value.onTokenExpired = async () => {
   }
 }
 
-keycloak.value.init({ onLoad: 'login-required', redirectUri: 'http://localhost:5173' }).then((authenticated) => {
-  if(authenticated)
-  localStorage.setItem('auth', '')
-}).catch((error)=> console.log(error))
+keycloak.value
+  .init({ onLoad: 'login-required', redirectUri: 'http://localhost:5173' })
+  .then((authenticated) => {
+    if (authenticated) localStorage.setItem('auth', '')
+  })
+  .catch((error) => console.log(error))
 
 export default keycloak

@@ -1,7 +1,9 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-body{
-  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+body {
+  font-family:
+    'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana,
+    sans-serif;
 }
 
 .background-container {
@@ -19,7 +21,9 @@ body{
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(175, 255, 255, 0.5);
   z-index: -1;
 }
 
+@theme{
+  --color-brand-primary: #C1D3D0;
+}

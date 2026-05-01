@@ -1,4 +1,3 @@
-
 import BookDetails from '@/pages/BookDetails.vue'
 import FriendsPage from '@/pages/FriendsPage.vue'
 import HomePage from '@/pages/HomePage.vue'

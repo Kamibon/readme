@@ -4,28 +4,15 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/authAxios'
 import keycloak from '@/keycloak/keycloak'
-
-interface UserState {
-  findAllUsersResponse: User[]
-  findUserByIdResponse?: User
-  findMeResponse?: User
-  findAllUsersStatus: PromiseStatuses
-  findUserByIdStatus: PromiseStatuses
-  findFollowedResponse: User[]
-  findFollowedStatus: PromiseStatuses
-  menuStatus: 'open' | 'closed'
-  token?: string
-}
+import type { Page } from '@/data/page'
 
 export const useUserStore = defineStore('user', () => {
-  const findAllUsersResponse = ref<User[]>([])
+  const findAllUsersResponse = ref<Page<User>>()
   const findMeResponse = ref<User>()
   const findUserByIdResponse = ref<User>()
   const findAllUsersStatus = ref<PromiseStatuses>(PromiseStatuses.idle)
   const findUserByIdStatus = ref<PromiseStatuses>(PromiseStatuses.idle)
   const menuStatus = ref<'open' | 'closed'>('closed')
-  const findFollowedResponse = ref<User[]>([])
-  const findFollowedStatus = ref<PromiseStatuses>(PromiseStatuses.idle)
   const token = ref<string | undefined>(undefined)
 
   const addFavoriteBook = async (user_id: number, book_id: number) => {
@@ -39,37 +26,35 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const findAllUsers = async () => {
-    findAllUsersResponse.value = await api
-      .get(apiPath + 'api/users')
-      .then((res) => res.data)
-      .catch((e) => console.log(e))
+    findAllUsersStatus.value = PromiseStatuses.loading
+    try {
+      const { data } = await api.get(apiPath + 'api/users')
+      findAllUsersStatus.value = PromiseStatuses.success
+      findAllUsersResponse.value = data
+    } catch (error) {
+      console.log(error)
+      findAllUsersStatus.value = PromiseStatuses.failed
+    }
   }
 
   const findMe = async (user_id: string) => {
-    findMeResponse.value = await api
-      .get(apiPath + 'api/users/find-me/' + user_id)
-      .then((res) => res.data)
+    try {
+      const { data } = await api.get(apiPath + 'api/users/find-me/' + user_id)
+      findMeResponse.value = data
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const findById = async (id: number) => {
-    findUserByIdResponse.value = await api.get(apiPath + 'api/users/' + id).then((res) => res.data)
-  }
-
-  const findFollowers = async (ids: number[]) => {
-    findFollowedResponse.value = (
-      await Promise.allSettled(ids.map((id) => api.get(apiPath + 'api/users/' + id)))
-    )
-      .filter((item) => item.status === 'fulfilled')
-      .map((elem) => elem.value.data)
-  }
-
-  const followUser = async (followerId: number, followedId: number) => {
+    findUserByIdStatus.value = PromiseStatuses.loading
     try {
-      await api.post(apiPath + 'api/users/' + followerId + '/follow/' + followedId)
+      const { data } = await api.get(apiPath + 'api/users/' + id)
+      findUserByIdResponse.value = data
+      findUserByIdStatus.value = PromiseStatuses.success
     } catch (error) {
       console.log(error)
-    } finally {
-      findAllUsers()
+      findUserByIdStatus.value = PromiseStatuses.failed
     }
   }
 
@@ -87,14 +72,10 @@ export const useUserStore = defineStore('user', () => {
     findAllUsersResponse,
     findAllUsersStatus,
     findById,
-    findFollowedResponse,
-    findFollowedStatus,
-    findFollowers,
     findMe,
     findMeResponse,
     findUserByIdResponse,
     findUserByIdStatus,
-    followUser,
     menuStatus,
     setMenuStatus,
     setToken,

@@ -33,10 +33,11 @@ export const useFollowStore = defineStore('follow', () => {
 
   const followUser = async (followerId: number, followedId: number) => {
     try {
+      if(!followedId || !followedId) throw Error('Ids cannot be undefined')
       await api.post(`${apiPath}api/follows/follow`, null, {
         params: { followerId, followedId },
       })
-      getFollows(followedId)
+      getFollows(followerId)
     } catch (error) {
       console.error('Error following user:', error)
     }
@@ -47,7 +48,7 @@ export const useFollowStore = defineStore('follow', () => {
       await api.post(`${apiPath}api/follows/unfollow`, null, {
         params: { followerId, followedId },
       })
-      getFollows(followedId)
+      getFollows(followerId)
     } catch (error) {
       console.error('Error unfollowing user:', error)
     }

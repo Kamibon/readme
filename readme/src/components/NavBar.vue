@@ -4,7 +4,7 @@
     <DropdownMenu />
     <input v-model="filter"
       class="px-3 py-2 bg-white rounded-2xl flex-grow border border-amber-900 shadow-2xs text-xs text-amber-950"
-      placeholder="Cerca una persona o un libro" />
+      placeholder="Cerca un libro" />
     <button @click="logout()">
       <AiOutlineLogout color="red" class="cursor-pointer" />
     </button>

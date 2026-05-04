@@ -7,11 +7,11 @@ export interface User {
   username: string
   password: string
   favorites: Book[]
-  follows: string[]
-  followed: string[]
 }
 
 export interface CredentialsDTO {
   username: string
   password: string
 }
+
+

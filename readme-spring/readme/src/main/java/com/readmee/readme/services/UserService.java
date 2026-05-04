@@ -1,9 +1,11 @@
 package com.readmee.readme.services;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.readmee.readme.models.Book;
@@ -35,8 +37,9 @@ public class UserService {
     return request;
   }
 
-  public List<User> findAllUsers() {
-    return repository.findAll();
+  public Page<User> findAllUsers(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    return repository.findAll(pageable);
   }
 
   public User getUserById(Integer id) {

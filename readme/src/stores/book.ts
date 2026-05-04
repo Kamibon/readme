@@ -1,5 +1,6 @@
 import api from '@/authAxios'
 import type { Book } from '@/data/book'
+import type { Page } from '@/data/page'
 import { apiPath, PromiseStatuses } from '@/data/utils'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -8,7 +9,7 @@ export const useBooksFiltersStore = defineStore('filter', () => {
   const filter = ref('')
   const chosenBook = ref<Book | undefined>()
 
-  const findAllBooksResponse = ref<Book[]>()
+  const findAllBooksResponse = ref<Page<Book>>()
   const findBookByIdResponse = ref<Book>()
   const findReadBooksResponse = ref<Book[]>()
 
@@ -25,13 +26,27 @@ export const useBooksFiltersStore = defineStore('filter', () => {
   }
 
   const findAllBooks = async () => {
-    const { data } = await api.get(apiPath + 'api/books')
-    findAllBooksResponse.value = data
+    findAllBooksStatus.value = PromiseStatuses.loading
+    try {
+      const { data } = await api.get(apiPath + 'api/books')
+      findAllBooksStatus.value = PromiseStatuses.success
+      findAllBooksResponse.value = data
+    } catch (error) {
+      console.log(error)
+      findAllBooksStatus.value = PromiseStatuses.failed
+    }
   }
 
   const findBookById = async (id: number) => {
-    const {data} = await api.get(apiPath + 'api/books/' + id)
-    findBookByIdResponse.value = data
+    findBookByIdStatus.value = PromiseStatuses.loading
+    try {
+      const { data } = await api.get(apiPath + 'api/books/' + id)
+      findBookByIdResponse.value = data
+      findBookByIdStatus.value = PromiseStatuses.success
+    } catch (error) {
+      console.log(error)
+      findBookByIdStatus.value = PromiseStatuses.failed
+    }
   }
 
   const findReadBooks = async (ids: number[]) => {

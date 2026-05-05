@@ -4,70 +4,91 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/authAxios'
 import keycloak from '@/keycloak/keycloak'
-
-interface UserState {
-  findAllUsersResponse?: User[]
-  findUserByIdResponse?: User
-  findMeResponse?: User
-  findAllUsersStatus: PromiseStatuses
-  findUserByIdStatus: PromiseStatuses
-  findFollowedResponse: User[]
-  findFollowedStatus: PromiseStatuses
-  menuStatus: 'open' | 'closed'
-  token?: string
-}
+import type { Page } from '@/data/page'
 
 export const useUserStore = defineStore('user', () => {
-  const userState = ref<UserState>({
-    findUserByIdStatus: PromiseStatuses.idle,
-    findAllUsersStatus: PromiseStatuses.idle,
-    menuStatus: 'closed',
-    findFollowedResponse: [],
-    findFollowedStatus: PromiseStatuses.idle,
-  })
+  const findAllUsersResponse = ref<Page<User>>()
+  const findMeResponse = ref<User>()
+  const findUserByIdResponse = ref<User>()
+  const findAllUsersStatus = ref<PromiseStatuses>(PromiseStatuses.idle)
+  const findUserByIdStatus = ref<PromiseStatuses>(PromiseStatuses.idle)
+  const menuStatus = ref<'open' | 'closed'>('closed')
+  const token = ref<string | undefined>(undefined)
 
-  const userMethods = {
-    addFavoriteBook: async (user_id: number, book_id: number) => {
-      try{
-
-      await api.put(apiPath + 'users/' + user_id + '/books/' + book_id)
-      }
-      catch(e){
-        console.log(e)
-      }
-      finally{
-        userMethods.findMe(keycloak.value!.subject!)
-      }
-    },
-    findAllUsers: async () => {
-      userState.value.findAllUsersResponse = await api
-        .get(apiPath + 'users')
-        .then((res) => res.data)
-    },
-    findMe: async (user_id: string) => {
-      userState.value.findMeResponse = await api
-        .get(apiPath + 'users/find-me/' + user_id)
-        .then((res) => res.data)
-    },
-    findById: async (id: string) => {
-     userState.value.findMeResponse =  userState.value.findUserByIdResponse = await api
-        .get(apiPath + 'users/' + id)
-        .then((res) => res.data)
-    },
-    findFollowers: async (ids: string[]) => {
-      userState.value.findFollowedResponse = (
-        await Promise.allSettled(ids.map((id) => api.get(apiPath + 'users/' + id)))
-      )
-        .filter((item) => item.status === 'fulfilled')
-        .map((elem) => elem.value.data)
-    },
-    setMenuStatus: (value: 'open' | 'closed') => {
-      userState.value.menuStatus = value
-    },
-    setToken: (value: string) => {
-      userState.value.token = value
-    },
+  const addFavoriteBook = async (user_id: number, book_id: number) => {
+    try {
+      await api.put(apiPath + 'api/users/' + user_id + '/books/' + book_id)
+    } catch (e) {
+      console.log(e)
+    } finally {
+      findMe(keycloak.value!.subject!)
+    }
   }
 
-  return { userState, userMethods }
+  const findAllUsers = async () => {
+    findAllUsersStatus.value = PromiseStatuses.loading
+    try {
+      const { data } = await api.get(apiPath + 'api/users')
+      findAllUsersStatus.value = PromiseStatuses.success
+      findAllUsersResponse.value = data
+    } catch (error) {
+      console.log(error)
+      findAllUsersStatus.value = PromiseStatuses.failed
+    }
+  }
+
+  const findMe = async (user_id: string) => {
+    try {
+      const { data } = await api.get(apiPath + 'api/users/find-me/' + user_id)
+      findMeResponse.value = data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const findById = async (id: number) => {
+    findUserByIdStatus.value = PromiseStatuses.loading
+    try {
+      const { data } = await api.get(apiPath + 'api/users/' + id)
+      findUserByIdResponse.value = data
+      findUserByIdStatus.value = PromiseStatuses.success
+    } catch (error) {
+      console.log(error)
+      findUserByIdStatus.value = PromiseStatuses.failed
+    }
+  }
+
+  const updateUser = async (id: string, user: Partial<User>) => {
+    try {
+      await api.put(apiPath + 'api/users/' + id, user)
+      findMe(id)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const setMenuStatus = (value: 'open' | 'closed') => {
+    menuStatus.value = value
+  }
+
+  const setToken = (value: string) => {
+    token.value = value
+  }
+
+  return {
+    addFavoriteBook,
+    findAllUsers,
+    findAllUsersResponse,
+    findAllUsersStatus,
+    findById,
+    findMe,
+    findMeResponse,
+    findUserByIdResponse,
+    findUserByIdStatus,
+    menuStatus,
+    setMenuStatus,
+    setToken,
+    token,
+    updateUser,
+  }
 })

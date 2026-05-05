@@ -1,16 +1,17 @@
-import type { Book } from "./book"
+import type { Book } from './book'
 
 export interface User {
-  id: string
-  user_id:string
+  id: number
+  userId: string
+  email: string
   username: string
   password: string
-  favorites: Book []
-  follows: string[]
-  followed: string[]
+  favorites: Book[]
 }
 
-export interface CredentialsDTO{
+export interface CredentialsDTO {
   username: string
   password: string
 }
+
+

@@ -26,4 +26,5 @@ body {
 
 @theme{
   --color-brand-primary: #C1D3D0;
+  --breakpoint-xs: 300px;
 }

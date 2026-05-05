@@ -23,9 +23,6 @@ public class UserService {
     @Autowired
     private BookRepository bookRepository;
 
-    @Autowired
-    private FollowRepository followRepository;
-
     public User createUser(User user) {
         User request = User.builder().username(user.getUsername()).email(user.getEmail()).build();
 

@@ -3,7 +3,7 @@
     class="bg-gradient-to-br from-[#e4bf8a] via-brand-primary to-[#9bb4b1] text-xl px-4 py-3 flex flex-row gap-4 justify-between items-center">
     <DropdownMenu />
     <input v-model="filter"
-      class="px-3 py-2 bg-white rounded-2xl flex-grow border border-amber-900 shadow-2xs text-xs text-amber-950"
+      class=" hidden xs:block px-3 py-2 bg-white rounded-2xl flex-grow border border-amber-900 shadow-2xs text-xs text-amber-950"
       placeholder="Cerca un libro" />
     <button @click="logout()">
       <AiOutlineLogout color="red" class="cursor-pointer" />

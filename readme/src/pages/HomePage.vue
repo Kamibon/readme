@@ -89,17 +89,17 @@ const myFavoriteIds = computed(() => {
   return new Set(findMeResponse.value?.favorites.map(f => f.id))
 })
 
-const isFavorite = (bookId: number) => {
-  return findMeResponse.value?.favorites.some(f => f.id === bookId)
-}
-
 const commonBooksCount = (user: User) => {
   return user.favorites.filter((fav: Book) =>
     myFavoriteIds.value.has(fav.id)
   ).length
 }
 
-function getDetails(book: Book) {
+const isFavorite = (bookId: number) => {
+  return findMeResponse.value?.favorites.some(f => f.id === bookId)
+}
+
+const getDetails = (book: Book) => {
   bookStore.setChosenBook(book)
   bookStore.findBookById(book.id)
   router.push('/books/' + book.id)

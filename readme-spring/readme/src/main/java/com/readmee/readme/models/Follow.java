@@ -2,24 +2,17 @@ package com.readmee.readme.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "follows")
-@Data
 @NoArgsConstructor
-@AllArgsConstructor
-public class Follow {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+public class Follow extends BaseEntity{
 
     @Column(name = "follower_id")
     private Integer followerId;

@@ -9,83 +9,73 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.readmee.readme.models.Book;
-import com.readmee.readme.models.Follow;
 import com.readmee.readme.models.User;
 import com.readmee.readme.repositories.BookRepository;
 import com.readmee.readme.repositories.FollowRepository;
 import com.readmee.readme.repositories.UserRepository;
 
-import jakarta.transaction.Transactional;
-
 @Service
 public class UserService {
 
-  @Autowired
-  private UserRepository repository;
+    @Autowired
+    private UserRepository repository;
 
-  @Autowired
-  private BookRepository bookRepository;
+    @Autowired
+    private BookRepository bookRepository;
 
-  @Autowired
-  private FollowRepository followRepository;
+    @Autowired
+    private FollowRepository followRepository;
 
-  public User createUser(User user) {
-    User request = User.builder().username(user.getUsername()).email(user.getEmail()).build();
+    public User createUser(User user) {
+        User request = User.builder().username(user.getUsername()).email(user.getEmail()).build();
 
-    repository.save(request);
+        repository.save(request);
 
-    return request;
-  }
-
-  public Page<User> findAllUsers(int page, int size) {
-    Pageable pageable = PageRequest.of(page, size);
-    return repository.findAll(pageable);
-  }
-
-  public User getUserById(Integer id) {
-    User user = repository.findById(id).orElseThrow();
-    return user;
-  }
-
-  public void deleteUser(Integer id) {
-    repository.deleteById(id);
-  }
-
-  public Optional<User> getUserByUserId(String user_id) {
-    return repository.findByUserId(user_id);
-  }
-
-  public void addFavorite(Integer userId, Integer bookId) {
-
-    User user = repository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("User not found"));
-
-    Book book = bookRepository.findById(bookId)
-        .orElseThrow(() -> new RuntimeException("Book not found"));
-
-    if (user.getFavorites().contains(book)) {
-
-      user.getFavorites().remove(book);
-    } else {
-
-      user.getFavorites().add(book);
+        return request;
     }
 
-    repository.save(user);
-  }
-
-  @Transactional
-  public void followUser(Integer followerId, Integer followedId) {
-    if (followerId.equals(followedId)) {
-        throw new RuntimeException("An user cannot follow themselves");
+    public Page<User> findAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findAll(pageable);
     }
 
-    Optional<Follow> existingFollow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId);
-    if (existingFollow.isPresent()) {
-        followRepository.delete(existingFollow.get());
+    public User getUserById(Integer id) {
+        User user = repository.findById(id).orElseThrow();
+        return user;
     }
 
-    Follow follow = new Follow(followerId, followedId);
-    followRepository.save(follow);
-  }
+    public void deleteUser(Integer id) {
+        repository.deleteById(id);
+    }
+
+    public void updateUser(String id, User user) {
+
+        User userToEdit = repository.findByUserId(id).orElseThrow();
+        userToEdit.setUsername(user.getUsername());
+        repository.save(userToEdit);
+    }
+
+    public Optional<User> getUserByUserId(String user_id) {
+        return repository.findByUserId(user_id);
+    }
+
+    public void addFavorite(Integer userId, Integer bookId) {
+
+        User user = repository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        if (user.getFavorites().contains(book)) {
+
+            user.getFavorites().remove(book);
+        } else {
+
+            user.getFavorites().add(book);
+        }
+
+        repository.save(user);
+    }
+
 }

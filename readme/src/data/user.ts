@@ -2,7 +2,7 @@ import type { Book } from './book'
 
 export interface User {
   id: number
-  user_id: string
+  userId: string
   email: string
   username: string
   password: string

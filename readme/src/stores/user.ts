@@ -58,6 +58,15 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const updateUser = async (id: string, user: Partial<User>) => {
+    try {
+      await api.put(apiPath + 'api/users/' + id, user)
+      findMe(id)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const setMenuStatus = (value: 'open' | 'closed') => {
     menuStatus.value = value
   }
@@ -80,5 +89,6 @@ export const useUserStore = defineStore('user', () => {
     setMenuStatus,
     setToken,
     token,
+    updateUser,
   }
 })

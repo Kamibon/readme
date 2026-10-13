@@ -7,17 +7,17 @@
   <div class="w-full flex items-center justify-center">
     <SpinnerComponent v-if="findUserByIdStatus === PromiseStatuses.loading" />
   </div>
-  <div v-if="user.value && findUserByIdStatus !== PromiseStatuses.loading"
+  <div v-if="user && findUserByIdStatus !== PromiseStatuses.loading"
     class="py-4 px-5 flex flex-col justify-center items-center gap-4">
     <img :src="`https://covers.openlibrary.org/b/isbn/${'8804404078'}-L.jpg`" class="rounded-full size-32" />
     <div class="flex flex-row gap-2 items-center">
-      <span class="font-semibold text-3xl">{{ user?.value.username }}</span>
+      <span class="font-semibold text-3xl">{{ user?.username }}</span>
       <div class="cursor-pointer hover:opacity-70" @click="openModal = true">
         <BsPencil color="#104e64" v-if="isMe" />
       </div>
     </div>
-    <div v-if="user.value.favorites.length" class="flex flex-wrap gap-2">
-      <div v-for="book in user?.value.favorites" :key="book.id"
+    <div v-if="findBooksByIdsResponse?.length" class="flex flex-wrap gap-2">
+      <div v-for="book in findBooksByIdsResponse" :key="book.id"
         class="flex flex-col grow gap-2 items-center justify-center">
         <img @click="getDetails(book)" :src="`https://covers.openlibrary.org/b/isbn/${book.isbn}-M.jpg`"
           class="p-1 object-cover cursor-pointer h-full rounded-md w-40 hover:bg-gray-200" />
@@ -29,12 +29,17 @@
     </div>
     <div v-else>
       <h3 class="text-black font-bold">
-        {{ `Sembra che ${user.value.username} non abbia ancora letto alcun libro :|` }}
+        {{ `Sembra che ${user.username} non abbia ancora letto alcun libro :|` }}
       </h3>
     </div>
     <ModalComponent @close="openModal = false" title="Modifica profilo" :isOpen="openModal">
-      <img :src="`https://covers.openlibrary.org/b/isbn/${'8804404078'}-M.jpg`"
-        class="rounded-full size-24 cursor-pointer hover:opacity-70 my-4" />
+      <div class="image-picker hover:opacity-70">
+        <img class="rounded-full cursor-pointer  my-4"
+          :src="`https://covers.openlibrary.org/b/isbn/${'8804404078'}-M.jpg`" alt="Seleziona immagine" />
+
+
+        <input type="file" accept="image/*" />
+      </div>
       <div class=" flex flex-col justify-start w-full">
         <label for="email">Username</label>
         <input v-if="findMeResponse" v-model="editedUsername" id="username"
@@ -58,7 +63,7 @@ import router from '@/router'
 import { useBooksFiltersStore } from '@/stores/book'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { BiError } from 'vue-icons-plus/bi'
 import { BsPencil } from 'vue-icons-plus/bs'
 import { useRoute } from 'vue-router'
@@ -69,18 +74,53 @@ const route = useRoute()
 const userStore = useUserStore()
 const bookStore = useBooksFiltersStore()
 const { findMeResponse, findUserByIdResponse, findUserByIdStatus } = storeToRefs(userStore)
-const { } = storeToRefs(bookStore)
+const { findBooksByIdsResponse } = storeToRefs(bookStore)
 
 const openModal = ref(false)
 const editedUsername = ref(findMeResponse.value?.username)
 const isMe = computed(() => !route.params.id)
-const user = computed(() => (isMe.value ? findMeResponse : findUserByIdResponse))
+const user = computed(() => (isMe.value ? findMeResponse.value : findUserByIdResponse.value))
 
 function getDetails(book: Book) {
   bookStore.findBookById(book.id)
   router.push('/books/' + book.id)
 }
 
+watch(
+  user,
+  (currentUser) => {
+    const favorites = currentUser?.favorites ?? []
+
+    if (favorites.length > 0) {
+      bookStore.findBooksByIds(favorites)
+    } else {
+      bookStore.findBooksByIdsResponse = []
+    }
+  },
+  { immediate: true }
+)
+
 </script>
 
-<style scoped></style>
+<style scoped>
+.image-picker {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.image-picker img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-picker input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+</style>

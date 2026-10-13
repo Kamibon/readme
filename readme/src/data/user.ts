@@ -1,4 +1,3 @@
-import type { Book } from './book'
 
 export interface User {
   id: number
@@ -6,7 +5,7 @@ export interface User {
   email: string
   username: string
   password: string
-  favorites: Book[]
+  favorites: number[]
 }
 
 export interface CredentialsDTO {

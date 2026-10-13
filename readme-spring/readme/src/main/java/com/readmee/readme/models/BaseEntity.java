@@ -1,17 +1,17 @@
 package com.readmee.readme.models;
 
-import java.time.Instant;
 import java.util.Date;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,17 +29,11 @@ public class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @CreatedDate 
+    @Column (name = "created_at")
     private Date createdAt;
 
+    @LastModifiedDate 
+    @Column (name = "updated_at")
     private Date updatedAt;
-
-    @PrePersist
-    void onCreate() {
-        createdAt = Date.from(Instant.now());
-    }
-
-    @PreUpdate
-    void onUpdate() {
-        updatedAt = Date.from(Instant.now());
-    }
 }

@@ -15,12 +15,12 @@ import lombok.Setter;
 public class Follow extends BaseEntity{
 
     @Column(name = "follower_id")
-    private Integer followerId;
+    private Long followerId;
 
     @Column(name = "followed_id")
-    private Integer followedId;
+    private Long followedId;
 
-    public Follow(Integer followerId, Integer followedId) {
+    public Follow(Long followerId, Long followedId) {
         this.followerId = followerId;
         this.followedId = followedId;
     }

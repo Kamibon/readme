@@ -10,10 +10,12 @@ export const useBooksFiltersStore = defineStore('filter', () => {
   const chosenBook = ref<Book | undefined>()
 
   const findAllBooksResponse = ref<Page<Book>>()
+  const findBooksByIdsResponse = ref<Book[]>()
   const findBookByIdResponse = ref<Book>()
   const findReadBooksResponse = ref<Book[]>()
 
   const findAllBooksStatus = ref(PromiseStatuses.idle)
+  const findBooksByIdsStatus = ref(PromiseStatuses.idle)
   const findBookByIdStatus = ref(PromiseStatuses.idle)
   const findReadBooksStatus = ref(PromiseStatuses.idle)
 
@@ -34,6 +36,22 @@ export const useBooksFiltersStore = defineStore('filter', () => {
     } catch (error) {
       console.log(error)
       findAllBooksStatus.value = PromiseStatuses.failed
+    }
+  }
+
+  const findBooksByIds = async (ids: number[]) => {
+    findBooksByIdsStatus.value = PromiseStatuses.loading
+    try {
+      const { data } = await api.get(apiPath + 'api/books/by-ids', {
+        params: {
+          ids: ids.join(','),
+        },
+      })
+      findBooksByIdsStatus.value = PromiseStatuses.success
+      findBooksByIdsResponse.value = data
+    } catch (error) {
+      console.log(error)
+      findBooksByIdsStatus.value = PromiseStatuses.failed
     }
   }
 
@@ -67,6 +85,9 @@ export const useBooksFiltersStore = defineStore('filter', () => {
     chosenBook,
     findAllBooksResponse,
     findBookByIdResponse,
+    findBooksByIds,
+    findBooksByIdsResponse,
+    findBooksByIdsStatus,
     findReadBooksResponse,
     findAllBooksStatus,
     findBookByIdStatus,

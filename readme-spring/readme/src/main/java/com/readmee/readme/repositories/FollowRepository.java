@@ -6,14 +6,13 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.readmee.readme.models.Follow;
-import com.readmee.readme.models.User;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
-    Optional<Follow> findByFollowerIdAndFollowedId(Integer followerId, Integer followedId);
+    Optional<Follow> findByFollowerIdAndFollowedId(Long followerId, Long followedId);
 
-    List<Follow> findByFollowerId(Integer followerId);
+    List<Follow> findByFollowerId(Long followerId);
 
-    List<Follow> findByFollowedId(Integer followedId);
+    List<Follow> findByFollowedId(Long followedId);
 
 }

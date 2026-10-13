@@ -4,9 +4,9 @@ import { ref } from 'vue'
 const keycloak = ref<Keycloak | null>(null)
 
 keycloak.value = new Keycloak({
-  url: 'http://localhost:9090',
-  realm: 'readme',
-  clientId: 'readme',
+  url: import.meta.env.VITE_KEYCLOAK_URL,
+  realm: import.meta.env.VITE_REALM,
+  clientId: import.meta.env.VITE_CLIENTID,
 })
 
 keycloak.value.onTokenExpired = async () => {
@@ -20,7 +20,7 @@ keycloak.value.onTokenExpired = async () => {
 }
 
 keycloak.value
-  .init({ onLoad: 'login-required', redirectUri: 'http://localhost:5173' })
+  .init({ onLoad: 'login-required', redirectUri: import.meta.env.VITE_REDIRECT_URI })
   .then((authenticated) => {
     if (authenticated) localStorage.setItem('auth', '')
   })

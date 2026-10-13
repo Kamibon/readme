@@ -12,16 +12,11 @@ import { useBooksFiltersStore } from './stores/book'
 import api from './authAxios'
 
 const userStore = useUserStore()
-const { menuStatus } = storeToRefs(userStore)
+const { menuStatus, findMeResponse } = storeToRefs(userStore)
 
 const route = useRoute()
 
 const bookStore = useBooksFiltersStore()
-
-const logout = () => {
-  localStorage.removeItem('auth')
-  keycloak.value?.logout()
-}
 
 watch(
   () => keycloak.value,
@@ -46,6 +41,12 @@ watch(
   { immediate: true }
 )
 
+watch(findMeResponse, (val) => {
+  if (val) {
+    bookStore.findBooksByIds(val.favorites)
+  }
+})
+
 </script>
 
 <template>
@@ -53,7 +54,6 @@ watch(
     <SideBar v-if="!route.fullPath.includes('login')" />
     <div v-if="!route.fullPath.includes('login')"
       :class="`${menuStatus === 'closed' ? 'w-full md:w-[95%] left-0 md:left-[5%]' : 'w-full md:w-[80%] left-[20%]'} relative ${route.fullPath.includes('login') && 'w-full left-0'}`">
-      <NavBar :logout="() => logout()" />
       <RouterView :key="$route.fullPath" />
     </div>
     <LoginPage v-if="route.fullPath.includes('login')" />

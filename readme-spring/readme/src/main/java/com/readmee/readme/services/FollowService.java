@@ -1,9 +1,11 @@
 package com.readmee.readme.services;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,17 +14,18 @@ import com.readmee.readme.models.User;
 import com.readmee.readme.repositories.FollowRepository;
 import com.readmee.readme.repositories.UserRepository;
 
+import lombok.AllArgsConstructor;
+
 @Service
+@AllArgsConstructor
 public class FollowService {
 
-    @Autowired
     FollowRepository followRepository;
 
-    @Autowired
     UserRepository userRepository;
 
     @Transactional
-    public void followUser(Integer followerId, Integer followedId) {
+    public Follow followUser(Long followerId, Long followedId) {
         if (followerId.equals(followedId)) {
             throw new RuntimeException("An user cannot follow themselves");
         }
@@ -32,30 +35,33 @@ public class FollowService {
         }
 
         Follow follow = new Follow(followerId, followedId);
-        followRepository.save(follow);
+        return followRepository.save(follow);
     }
 
     @Transactional
-    public void unfollowUser(Integer followerId, Integer followedId) {
+    public String unfollowUser(Long followerId, Long followedId) throws NotFoundException {
         Follow follow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId)
-                .orElseThrow(() -> new RuntimeException("Follow relationship not found"));
+                .orElseThrow(() -> new NotFoundException());
 
         followRepository.delete(follow);
+
+        return "User unfollowed";
     }
 
-    public List<User> getFollows(Integer followerId) {
+    public List<User> getFollows(Long followerId) {
         List<Follow> follows = followRepository.findByFollowerId(followerId);
-        List<Integer> followedIds = follows.stream()
-                .map(Follow::getFollowedId)
-                .collect(Collectors.toList());
+        Set<Long> followedIds = follows.stream()
+                .map(follower -> follower.getFollowedId())
+                .collect(Collectors.toSet());
         return userRepository.findAllById(followedIds);
     }
 
-    public List<User> getFollowers(Integer followedId) {
+    public List<User> getFollowers(Long followedId) {
         List<Follow> followers = followRepository.findByFollowedId(followedId);
-        List<Integer> followerIds = followers.stream()
-                .map(Follow::getFollowerId)
-                .collect(Collectors.toList());
+    
+        Set<Long> followerIds = followers.stream()
+                .map(follower -> follower.getFollowerId())
+                .collect(Collectors.toSet());
         return userRepository.findAllById(followerIds);
     }
 }

@@ -1,4 +1,5 @@
 <template>
+  <NavBar :logout="() => logout()" />
   <div class="flex flex-col gap-2">
     <span class="font-semibold mt-2 text-2xl text-blue-700 text-center">I libri di tendenza</span>
     <div class="flex flex-col gap-4 items-center">
@@ -9,7 +10,7 @@
             class="p-1 object-cover cursor-pointer h-full rounded-md w-40 hover:bg-gray-200" />
           <span class="text-md font-semibold text-cyan-900">{{ book.title }}</span>
           <div class="relative cursor-pointer group w-fit">
-            <div @click="userStore.addFavoriteBook(Number(findMeResponse?.id), book.id)">
+            <div @click="userStore.addFavoriteBook(Number(findMeResponse.id), book.id)">
               <FiBook title="L'ho letto" color="orange" :class="{
                 'block': !isFavorite(book.id),
                 'hidden': isFavorite(book.id),
@@ -21,17 +22,17 @@
             </div>
           </div>
         </div>
-        <span class="font-bold text-black" v-if="!filteredBooks.length">Sembra che il libro che stai cercando non ci sia :|</span>
+        <span class="font-bold text-black" v-if="!filteredBooks.length">Sembra che il libro che stai cercando non ci sia
+          :|</span>
       </div>
       <PaginationComponent :current-page="currentpage" :total-items="findAllBooksResponse?.totalElements || 0"
         :items-per-page="findAllBooksResponse?.size || 0" />
     </div>
 
     <span class="font-semibold mt-2 text-2xl text-blue-700 text-center">Persone che potresti conoscere</span>
-    <div class="px-4 py-3 grid grid-cols-2 md:flex md:flex-row gap-4">
+    <div class="px-4 py-3 grid grid-cols-2 md:flex md:flex-row gap-4 overflow-x-scroll">
       <ProfileCard v-bind:key="value.id" v-for="value in suggestedUsers" :id="value.id" :name="value.username"
-        :books="commonBooksCount(value)"
-        :click-handler="() => followStore.followUser(findMeResponse!.id, value.id)" />
+        :books="commonBooksCount(value)" :click-handler="() => followStore.followUser(findMeResponse!.id, value.id)" />
     </div>
   </div>
 </template>
@@ -39,6 +40,7 @@
 <script setup lang="ts">
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import ProfileCard from '@/components/ProfileCard.vue'
+import NavBar from '@/components/NavBar.vue'
 import type { Book } from '@/data/book'
 import type { User } from '@/data/user'
 import keycloak from '@/keycloak/keycloak'
@@ -59,6 +61,11 @@ const { findMeResponse, findAllUsersResponse } = storeToRefs(userStore)
 
 const currentpage = ref(1)
 
+const logout = () => {
+  localStorage.removeItem('auth')
+  keycloak.value?.logout()
+}
+
 watch(() => keycloak.value, (val) => {
   if (val)
     val.onAuthSuccess = async () => {
@@ -67,7 +74,6 @@ watch(() => keycloak.value, (val) => {
       await userStore.findAllUsers()
     }
 })
-
 
 const filteredBooks = computed(() => {
   return findAllBooksResponse.value?.content.filter((item) =>
@@ -86,17 +92,17 @@ const suggestedUsers = computed(() => {
 })
 
 const myFavoriteIds = computed(() => {
-  return new Set(findMeResponse.value?.favorites.map(f => f.id))
+  return new Set(findMeResponse.value?.favorites)
 })
 
 const commonBooksCount = (user: User) => {
-  return user.favorites.filter((fav: Book) =>
-    myFavoriteIds.value.has(fav.id)
+  return user.favorites.filter((fav) =>
+    myFavoriteIds.value.has(fav)
   ).length
 }
 
 const isFavorite = (bookId: number) => {
-  return findMeResponse.value?.favorites.some(f => f.id === bookId)
+  return findMeResponse.value?.favorites.some(f => f === bookId)
 }
 
 const getDetails = (book: Book) => {

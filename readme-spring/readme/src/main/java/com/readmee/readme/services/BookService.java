@@ -7,6 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import com.readmee.readme.dtos.BookResponse;
 import com.readmee.readme.dtos.CreateBookRequest;
@@ -15,24 +17,28 @@ import com.readmee.readme.models.Book;
 import com.readmee.readme.repositories.BookRepository;
 import com.readmee.readme.repositories.UserRepository;
 
-import lombok.AllArgsConstructor;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@Validated
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class BookService {
 
-   BookRepository repository;
+   private final BookRepository repository;
 
-   UserRepository userRepository;
+   private final UserRepository userRepository;
 
-   BookMapper mapper;
+   private final BookMapper mapper;
 
+   @Transactional
    public BookResponse createBook(CreateBookRequest book) {
       Book request = Book.builder().title(book.getTitle()).isbn(book.getIsbn()).build();
 
-      repository.save(request);
+      Book savedBook = repository.save(request);
 
-      return mapper.toResponse(request);
+      return mapper.toResponse(savedBook);
    }
 
    public Page<BookResponse> findAllBooks(int page, int size) {
@@ -45,19 +51,23 @@ public class BookService {
    public List<BookResponse> getBooksByIds(List<Long> ids) {
       return repository.findAllById(ids)
             .stream()
-            .map(book -> mapper.toResponse(book))
+            .map(mapper::toResponse)
             .toList();
    }
 
    public BookResponse getBookById(Long id) {
-      Book book = repository.findById(id).orElseThrow();
+      Book book = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("This book does not exist"));
       long numberOfFavorites = userRepository.countByFavoritesContaining(book);
       book.setDescription(
             book.getDescription() + " - Numero di persone a cui piace questo libro: " + numberOfFavorites);
       return mapper.toResponse(book);
    }
 
+   @Transactional
    public void deleteBook(Long id) {
-      repository.deleteById(id);
+      Book book = repository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException(
+                  "Book not found with id: " + id));
+      repository.delete(book);
    }
 }

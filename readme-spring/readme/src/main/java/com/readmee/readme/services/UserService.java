@@ -1,12 +1,13 @@
 package com.readmee.readme.services;
 
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.readmee.readme.dtos.CreateUserRequest;
+import com.readmee.readme.dtos.UpdateUserRequest;
 import com.readmee.readme.dtos.UserResponse;
 import com.readmee.readme.mappers.UserMapper;
 import com.readmee.readme.models.Book;
@@ -14,18 +15,21 @@ import com.readmee.readme.models.User;
 import com.readmee.readme.repositories.BookRepository;
 import com.readmee.readme.repositories.UserRepository;
 
-import lombok.AllArgsConstructor;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class UserService {
 
-    private UserRepository repository;
+    private final UserRepository repository;
 
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
 
-    private UserMapper mapper;
+    private final UserMapper mapper;
 
+    @Transactional 
     public UserResponse createUser(CreateUserRequest user) {
         User request = User.builder().username(user.getUsername()).email(user.getEmail()).build();
 
@@ -41,19 +45,29 @@ public class UserService {
     }
 
     public UserResponse getUserById(Long id) {
-        User user = repository.findById(id).orElseThrow();
+        User user = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("This user does not exist"));
         return mapper.toResponse(user);
     }
 
-    public void deleteUser(Long id) {
-        repository.deleteById(id);
+    @Transactional 
+    public void deleteUser(String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID non valido");
+        }
+        User user = repository.findByUserId(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+        repository.deleteById(user.getId());
     }
 
-    public void updateUser(String id, User user) {
+    @Transactional 
+    public UserResponse updateUser(String id, UpdateUserRequest user) {
 
-        User userToEdit = repository.findByUserId(id).orElseThrow();
+        User userToEdit = repository.findByUserId(id)
+                .orElseThrow(() -> new EntityNotFoundException("This user does not exist"));
         userToEdit.setUsername(user.getUsername());
-        repository.save(userToEdit);
+
+        User editedUser = repository.save(userToEdit);
+        return mapper.toResponse(editedUser);
     }
 
     public UserResponse getUserByUserId(String user_id) {
@@ -61,13 +75,13 @@ public class UserService {
         return mapper.toResponse(user);
     }
 
-    public void addFavorite(Long userId, Long bookId) throws NotFoundException{
+    public void addFavorite(String userId, Long bookId) {
 
-        User user = repository.findById(userId)
-                .orElseThrow(() -> new NotFoundException());
+        User user = repository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException());
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new NotFoundException());
+                .orElseThrow(() -> new EntityNotFoundException());
 
         if (user.getFavorites().contains(book)) {
 

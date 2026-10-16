@@ -7,7 +7,6 @@
 
 <script setup lang="ts">
 import ProfileCard from '@/components/ProfileCard.vue'
-import type { Book } from '@/data/book'
 import type { User } from '@/data/user'
 import { useFollowStore } from '@/stores/follow'
 import { useUserStore } from '@/stores/user'
@@ -19,13 +18,15 @@ const userStore = useUserStore()
 const { follows } = storeToRefs(followStore)
 const { findMeResponse } = storeToRefs(userStore)
 
+
 const myFavoriteIds = computed(() => {
-  return new Set(findMeResponse.value?.favorites.map(f => f.id))
+  return new Set(findMeResponse.value?.favorites)
 })
 
 const commonBooksCount = (user: User) => {
-  return user.favorites.filter((fav: Book) =>
-    myFavoriteIds.value.has(fav.id)
+
+  return user.favorites.filter((fav) =>
+    myFavoriteIds.value.has(fav)
   ).length
 }
 

@@ -15,7 +15,7 @@ export const useUserStore = defineStore('user', () => {
   const menuStatus = ref<'open' | 'closed'>('closed')
   const token = ref<string | undefined>(undefined)
 
-  const addFavoriteBook = async (user_id: number, book_id: number) => {
+  const addFavoriteBook = async (user_id: string, book_id: number) => {
     try {
       await api.put(apiPath + 'api/users/' + user_id + '/books/' + book_id)
     } catch (e) {

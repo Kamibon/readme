@@ -1,37 +1,45 @@
 package com.readmee.readme.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.readmee.readme.dtos.UserResponse;
+import com.readmee.readme.mappers.UserMapper;
 import com.readmee.readme.models.Follow;
-import com.readmee.readme.models.User;
 import com.readmee.readme.repositories.FollowRepository;
 import com.readmee.readme.repositories.UserRepository;
 
-import lombok.AllArgsConstructor;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor 
 public class FollowService {
 
-    FollowRepository followRepository;
+    private final FollowRepository followRepository;
 
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    private final UserMapper mapper;
 
     @Transactional
     public Follow followUser(Long followerId, Long followedId) {
         if (followerId.equals(followedId)) {
-            throw new RuntimeException("An user cannot follow themselves");
+            throw new IllegalArgumentException("An user cannot follow themselves");
+        }
+
+        if (!userRepository.existsById(followerId)
+                || !userRepository.existsById(followedId)) {
+            throw new EntityNotFoundException(
+                    "Follower or followed user does not exist");
         }
 
         if (followRepository.findByFollowerIdAndFollowedId(followerId, followedId).isPresent()) {
-            throw new RuntimeException("You already follow this user");
+            throw new IllegalArgumentException("You already follow this user");
         }
 
         Follow follow = new Follow(followerId, followedId);
@@ -39,29 +47,32 @@ public class FollowService {
     }
 
     @Transactional
-    public String unfollowUser(Long followerId, Long followedId) throws NotFoundException {
+    public void unfollowUser(Long followerId, Long followedId) {
         Follow follow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId)
-                .orElseThrow(() -> new NotFoundException());
+                .orElseThrow(() -> new EntityNotFoundException("You don't follow this user"));
 
         followRepository.delete(follow);
 
-        return "User unfollowed";
     }
 
-    public List<User> getFollows(Long followerId) {
-        List<Follow> follows = followRepository.findByFollowerId(followerId);
-        Set<Long> followedIds = follows.stream()
-                .map(follower -> follower.getFollowedId())
-                .collect(Collectors.toSet());
-        return userRepository.findAllById(followedIds);
-    }
+    public List<UserResponse> getFollows(Long followerId) {
+    return followRepository.findByFollowerId(followerId)
+            .stream()
+            .map(follow -> follow.getFollowedId())
+            .collect(Collectors.collectingAndThen(
+                    Collectors.toList(),
+                    userRepository::findAllById))
+            .stream()
+            .map(mapper::toResponse)
+            .toList();
+}
 
-    public List<User> getFollowers(Long followedId) {
+    public List<UserResponse> getFollowers(Long followedId) {
         List<Follow> followers = followRepository.findByFollowedId(followedId);
-    
+
         Set<Long> followerIds = followers.stream()
                 .map(follower -> follower.getFollowerId())
                 .collect(Collectors.toSet());
-        return userRepository.findAllById(followerIds);
+        return userRepository.findAllById(followerIds).stream().map(user -> mapper.toResponse(user)).toList();
     }
 }

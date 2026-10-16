@@ -19,48 +19,55 @@ import com.readmee.readme.dtos.BookResponse;
 import com.readmee.readme.dtos.CreateBookRequest;
 import com.readmee.readme.services.BookService;
 
-import jakarta.annotation.security.RolesAllowed;
-import lombok.AllArgsConstructor;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @PreAuthorize("hasAnyAuthority('admin', 'user')")
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/books")
 public class BookController {
 
-    BookService service;
+    private final BookService service;
 
     @GetMapping
     public Page<BookResponse> getBooks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
 
         return service.findAllBooks(page, size);
     }
 
     @GetMapping("/by-ids")
     public List<BookResponse> getBooksByIds(
-            @RequestParam List<Long> ids) {
+            @NotEmpty @Size(max = 100) @RequestParam List<@NotNull @Positive Long> ids) {
 
         return service.getBooksByIds(ids);
     }
 
     @GetMapping("/{id}")
-    @RolesAllowed("user")
-    public ResponseEntity<BookResponse> getBookById(@PathVariable Long id) {
+    public ResponseEntity<BookResponse> getBookById(@PathVariable @Positive  @NotNull  Long id) {
         return ResponseEntity.ok(service.getBookById(id));
     }
 
     @PostMapping
-    public ResponseEntity<BookResponse> createBook(@RequestBody CreateBookRequest book) {
+    public ResponseEntity<BookResponse> createBook(@RequestBody @Valid CreateBookRequest book) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(service.createBook(book));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<Void> deleteBook(@PathVariable @Positive  @NotNull Long id) {
         service.deleteBook(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -10,7 +10,7 @@
             class="p-1 object-cover cursor-pointer h-full rounded-md w-40 hover:bg-gray-200" />
           <span class="text-md font-semibold text-cyan-900">{{ book.title }}</span>
           <div class="relative cursor-pointer group w-fit">
-            <div @click="userStore.addFavoriteBook(Number(findMeResponse.id), book.id)">
+            <div @click="userStore.addFavoriteBook(findMeResponse.userId, book.id)">
               <FiBook title="L'ho letto" color="orange" :class="{
                 'block': !isFavorite(book.id),
                 'hidden': isFavorite(book.id),
